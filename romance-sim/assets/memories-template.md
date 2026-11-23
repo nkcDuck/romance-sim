@@ -16,7 +16,8 @@
 - **Godmode 測試模式 (测试模式 / Testing Mode)**：關 / 关 / Off（開啟後好感度／信任度暫時拉滿並言聽計從，關閉時恢復原數值與自主人格）
 - **心情可見 (心情可见 / Mood Visibility)**：關 / 关 / Off
 - **心聲可見 (心声可见 / Inner-Voice Visibility)**：關 / 关 / Off
-- **場景畫風 (场景画风 / Scene Art Style)**：（未指定 / 未指定 / Unspecified；預設依人設與氛圍自動決定，可由使用者隨時指定）
+- **場景畫風 (场景画风 / Scene Art Style)**：預設寫實畫風＋美顏效果 / 默认写实画风＋美颜效果 / Realistic + Beauty Filter（預設禁止 Q 版插畫，除非使用者明確提及；可由使用者隨時指定其他畫風）
+- **角色參考照 (角色参考照 / Character Reference Photo)**：無 / 无 / None（支援使用者自行上傳照片決定角色外貌，建議存於 `images/reference.*` 供生圖維持一致性）
 - **內容分級 (内容分级 / Content Rating)**：曖昧心動 / 暧昧心动 / Romantic Tension（模式：自動 Auto；可選：純愛清水 Pure / 曖昧心動 Romantic Tension / 深度浪漫 Mature Romance / 自訂 Custom）
 - **活躍硬邊界 (活跃硬边界 / Active Hard Boundaries)**：無 / 无 / None
 

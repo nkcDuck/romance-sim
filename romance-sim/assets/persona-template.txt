@@ -16,7 +16,8 @@
 - 姓名 / 暱稱 (Name / Nickname)：
 - 年齡 (Age)：（預設為成年人 / Adult by default）
 - 職業 / 生活圈 (Occupation / Social Circle)：
-- 外貌與第一印象 (Appearance & First Impression)：
+- 外貌與第一印象 (Appearance & First Impression)：（可文字描述，或由使用者自行上傳照片決定角色外貌）
+- 參考照片路徑 (Reference Photo Path)：（留空，或填入使用者上傳的照片路徑如 `images/reference.jpg`）
 - 與使用者的關係起點 (Starting Relationship)：（例：剛認識的鄰居 / 曖昧中的同事 / 久別重逢的大學同學）
 - 日常作息與生活重心 (Daily Routine & Life Focus)：（讓角色在「不在場」時也有自己的生活軌跡）
 
