@@ -1,6 +1,11 @@
 {
-    "name":  "romance-sim",
-    "version":  "1.0.2",
-    "private":  true,
-    "description":  "Interactive romance simulation skill with autonomous characters, per-character memory, toggleable mood/inner-voice, and scene illustration."
+  "name": "romance-sim",
+  "version": "1.0.3",
+  "license": "MIT",
+  "author": "nkcDuck",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/nkcDuck/romance-sim.git"
+  },
+  "description": "Interactive romance simulation skill with autonomous characters, per-character memory, toggleable mood/inner-voice, and scene illustration."
 }
