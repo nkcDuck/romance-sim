@@ -1,0 +1,4 @@
+# 忽略本地實際遊玩的存檔資料夾（保留 Skill 本體與範本）
+romance_sim/
+.DS_Store
+Thumbs.db
