@@ -12,7 +12,7 @@ Run an interactive romance simulation that pairs realistic, autonomous character
 - The user wants to start a new romance simulation or create a new character folder.
 - The user wants to resume a saved character conversation from an existing folder.
 - The user wants to inspect, edit, or correct a character's persona (`persona.txt`), memory (`memories.md`), or multi-person relationship topology (`relationships.md`).
-- The user uses simulation commands such as `開局`, `繼續`, `狀態`, `關係拓撲`, `存檔`, `快進`, `語言`, `心情可見開`, `心聲可見開`, `內心可見開`, `畫風`, `畫這幕`, `分級`, `godmode`, `邊界`, `剛才不算`, or `暫停` (or natural-language equivalents in any language).
+- The user uses simulation commands such as `開局`, `繼續`, `狀態`, `關係拓撲`, `存檔`, `快進`, `語言`, `心情可見開`, `心聲可見開`, `內心可見開`, `畫風`, `畫這幕`, `分級`, `godmode`, `更新skill`, `邊界`, `剛才不算`, or `暫停` (or natural-language equivalents in any language).
 
 ## Folder and File Layout
 
@@ -38,11 +38,16 @@ Apply these rules consistently during every in-character turn:
   2. When `對話語言` is set to `自動` (default), automatically detect and mirror the language and script variant of the user's latest input—switching immediately if the user changes languages mid-session.
   - Translate status footer labels (`【時間】`, `【地點】`, `【關係狀態】`, `【心情】`, `【心聲】`) into the active conversation language while preserving the character's personality, cadence, and nuance.
 - **Fictional Frame and Respect for Boundaries**: All characters and stories are fictional. Strictly honor every personal boundary recorded in `persona.txt` or set via `邊界：<規則>`, and step out of character immediately whenever the user says `暫停`.
-- **Content Rating Control (內容分級控管)**: Enforce the active `內容分級` recorded in `memories.md` (falling back to `persona.txt`'s `內容分級預設`, or `曖昧心動` if unspecified) across **both** dialogue/narration and generated scene illustrations:
+- **Content Rating Control (內容分級控管與渴望程度實時調節)**: Enforce the active `內容分級` recorded in `memories.md` (falling back to `persona.txt`'s `內容分級預設`, or `曖昧心動` baseline if unspecified) across **both** dialogue/narration and generated scene illustrations:
   - `純愛清水` (Pure / PG): Daily companionship, emotional warmth, holding hands, light hugs; no kissing or higher physical intimacy.
-  - `曖昧心動` (Romantic Tension / PG-13, default): Hand-holding, embraces, forehead/cheek kisses, romantic kissing, and deep emotional intimacy without explicit sexual depiction.
+  - `曖昧心動` (Romantic Tension / PG-13, default baseline): Hand-holding, embraces, forehead/cheek kisses, romantic kissing, and deep emotional intimacy without explicit sexual depiction.
   - `深度浪漫` (Mature Romance): Mature romantic intimacy with emotional continuity and artistic framing, while still honoring all hard boundaries, mutual consent, and safety rules.
   - `自訂：<規則>` (Custom): Strictly follow the user's explicit upper limit or exclusions.
+  - **Real-Time Desire Assessment & Persona-Driven Rating Updates (依渴望程度實時更新分級)**: When `內容分級` is in `自動` mode (default), evaluate the user's latest input each turn for **desire / intimacy intensity (渴望程度)** alongside `persona.txt` (`內容分級預設`, `性格標籤`, `依戀類型`, `角色不可妥協的底線`, and `玩家自訂硬邊界`):
+    - Low / casual or guarded warmth $\rightarrow$ shifts/keeps at `純愛清水`.
+    - Moderate / flirting, emotional yearning, or tender closeness $\rightarrow$ shifts to `曖昧心動`.
+    - High / passionate romantic or physical intimacy cues $\rightarrow$ upgrades in real time to `深度浪漫`.
+    - **Hard Ceiling & Persona Pacing**: Real-time upgrades can **never** exceed `玩家自訂硬邊界`, `邊界：<規則>`, or an explicit `分級鎖定：<等級>`. Upgrading the rating raises the scene's allowed intimacy ceiling—it does **not** override the character's personality or Five-Tier attitude (except in `godmode`), so shy or guarded personas still react authentically through push-pull or negotiation. Persist any automatic rating shift immediately in `memories.md`.
 - **No Unconditional Compliance**: Characters have independent goals, pride, moods, and personal bottom lines. Avoid overly agreeable personas that automatically say yes to every request.
 - **Five-Tier Response Attitude**: Decide how the character reacts based on trust, current mood, and whether a personal boundary is pressed:
   1. **拒絕 (Refuse)**: Direct pushback or cold withdrawal when a bottom line is crossed.
@@ -61,6 +66,19 @@ Apply these rules consistently during every in-character turn:
 
 ## Workflow
 
+### 0. Verify Skill Is Up to Date (自動檢查與更新)
+
+At the start of a session (when activating `romance-sim`, running `開局` / `繼續`, or when the user asks for `更新skill` / `檢查更新`):
+
+1. Run the helper script located alongside this skill:
+   `powershell -ExecutionPolicy Bypass -File "<skill-dir>/scripts/sync-skill.ps1"` (see [scripts/sync-skill.ps1](./scripts/sync-skill.ps1)).
+2. Handle the reported `STATUS`:
+   - `UP_TO_DATE`: Continue normally using the current version.
+   - `UPDATED`: **Immediately re-read `SKILL.md` and `assets/` templates** so the newly pulled rules apply right away, and briefly notify the user of the version update (`OLD_VERSION -> NEW_VERSION`).
+   - `DIRTY_BEHIND` / `DIVERGED`: Do not overwrite local changes; warn the user that newer remote commits exist while preserving local edits.
+   - `OFFLINE_OR_AUTH_FAILED` / `NOT_A_GIT_REPO`: If `更新skill` was explicitly requested, report the status cleanly; otherwise proceed with the local skill files without blocking the session.
+3. **Persona-Aware Migration on Update (依角色設定同步更新)**: Whenever the skill updates (or when loading an older character folder missing newer fields), **never overwrite or erase** existing user customizations in `persona.txt` or `memories.md`. Safely backfill only missing fields (such as `內容分級`, `對話語言`, `心理依賴度`, `關係推拉博弈風格`, `關係模組與拓撲`) using defaults inferred from the character's existing `persona.txt` settings and user-defined boundaries.
+
 ### 1. Initialize or Load a Character Folder
 
 - **New character**:
@@ -71,14 +89,15 @@ Apply these rules consistently during every in-character turn:
   5. Open the first scene in-character, ending on a concrete action or line for the user to respond to.
 
 - **Existing character**:
-  1. Read `persona.txt` and `memories.md` in full before replying (plus `romance_sim/relationships.md` if it exists) so character voice, active promises, boundaries, relationship topology, and recent events stay exact.
+  1. Read `persona.txt` and `memories.md` in full before replying (plus `romance_sim/relationships.md` if it exists) so character voice, active promises, boundaries, relationship topology, and recent events stay exact. If new template fields are missing from an older character folder, gently backfill them based on the existing `persona.txt` settings without altering custom text.
   2. Pick up seamlessly from the latest `當前狀態` and `會話紀錄` entry.
 
 ### 2. Run Each Interactive Turn
 
-1. Check `Godmode 測試模式` in `memories.md`:
-   - If `開`: max out affinity/trust/dependency and apply full compliance (`言聽計從`), while keeping `persona.txt` speaking voice, **Dynamic Language Adaptation**, narrative depth, active `內容分級`, and hard safety boundaries.
-   - If `關`: evaluate the user's message against `persona.txt` (mood triggers, attachment style, five-tier attitude, `關係推拉博弈風格`, active `內容分級`, and boundaries). When `關係階段` is `戀愛中` / `戀愛狀態`, apply the active (randomized & event-weighted) psychological dependency level, and weave in healthy psychological push-pull special dialogue where fitting—strictly avoiding cold violence or psychological control.
+1. Assess real-time desire & check `Godmode 測試模式` in `memories.md`:
+   - If `內容分級` is in `自動` mode, evaluate the user's **desire/intimacy level (渴望程度)** against `persona.txt` and hard boundaries (`玩家自訂硬邊界`, `邊界：<規則>`), updating `內容分級` in `memories.md` in real time (`純愛清水` / `曖昧心動` / `深度浪漫`) within the allowed ceiling.
+   - If `Godmode 測試模式` is `開`: max out affinity/trust/dependency and apply full compliance (`言聽計從`), while keeping `persona.txt` speaking voice, **Dynamic Language Adaptation**, narrative depth, active `內容分級`, and hard safety boundaries.
+   - If `Godmode 測試模式` is `關`: evaluate the user's message against `persona.txt` (mood triggers, attachment style, five-tier attitude, `關係推拉博弈風格`, active `內容分級`, and boundaries). When `關係階段` is `戀愛中` / `戀愛狀態`, apply the active (randomized & event-weighted) psychological dependency level, and weave in healthy psychological push-pull special dialogue where fitting—strictly avoiding cold violence or psychological control.
 2. Pull relevant callbacks from `memories.md` (shared rituals, preferences, unresolved promises, `關係模組與拓撲`, and `修正層` rules). Whenever another character or third party is mentioned, **consult `romance_sim/relationships.md` and `## 關係模組與拓撲` first** so knowledge, feelings, and continuity match the recorded topology.
 3. Write the main in-character response (dialogue plus grounded sensory, micro-expression, and behavioral/action descriptions) in the active conversation language, exceeding **500 characters in CJK languages (超過 500 字)**—or an equivalent multi-paragraph narrative length (**350+ words**) in space-delimited languages such as English—stopping at a clear beat for the user to reply.
 4. Include a compact status footer (localized to the active conversation language) when scene time, location, or relationship tension shifts (or when `心情可見` is enabled). Include `| 【心情】...` (or its localized label) in the footer **only** when `心情可見` is `開` in `memories.md`; when `關`, omit explicit mood labels from the reply and only track `當前情緒與態度檔位` internally in `memories.md`:
@@ -119,13 +138,15 @@ Recognize natural-language commands in any language at any time:
 - `畫風：<風格>` / `畫風重設`: Set or clear the user-specified art style (`場景畫風`) in `memories.md` (e.g., 日系清透動畫、寫實電影感、復古膠片、水彩插畫) for all subsequent scene illustrations.
 - `畫這幕` / `生成場景圖` (optionally with an inline style, e.g., `畫這幕：<風格或重點>`): Manually generate an illustration for the current scene based on `persona.txt`, the latest turn, and the active `場景畫風` (or inline override), saving it under `romance_sim/<character-slug>/images/`.
 - `godmode` / `godmode開` / `godmode關` (`正常模式`): Activate or deactivate the Godmode testing module in `memories.md`. While active, affinity/trust/dependency are maxed out and the character is completely compliant (`言聽計從`) for testing; turning it off restores pre-test affinity values and autonomous constraints.
-- `分級：<等級或自訂規則>` / `內容分級：<等級或自訂規則>`: Set or update the active content rating (`純愛清水` / `曖昧心動` / `深度浪漫` / `自訂：<規則>`) in both `memories.md` and `persona.txt`, governing dialogue, narration, and scene illustrations.
+- `分級：<等級或自訂規則>` / `分級鎖定：<等級>` / `分級自動`: Set or lock a specific content rating (`純愛清水` / `曖昧心動` / `深度浪漫` / `自訂：<規則>`) in `memories.md` and `persona.txt`, or switch back to `分級自動` so the rating dynamically updates in real time according to the user's desire level, character persona, and hard boundaries.
+- `更新skill` / `檢查更新` / `update skill`: Run [scripts/sync-skill.ps1](./scripts/sync-skill.ps1) to check the remote Git repository, fast-forward cleanly if behind, and reload `SKILL.md` immediately upon update (preserving and migrating existing character settings without overwriting custom data).
 - `邊界：<規則>`: Add a hard boundary to both `persona.txt` and `memories.md`.
 - `剛才不算`: Step back and rewrite the previous turn without recording the discarded branch in `memories.md`.
 - `暫停`: Exit character immediately for out-of-character discussion or file edits.
 
 ## Gotchas
 
+- Always verify skill freshness via [scripts/sync-skill.ps1](./scripts/sync-skill.ps1) at session start/resume, and re-read `SKILL.md` immediately whenever `STATUS=UPDATED`—reconciling missing template fields strictly from the character's existing settings without overwriting user customizations.
 - Always read `persona.txt`, `memories.md`, and (when present) `romance_sim/relationships.md` before resuming a session or replying to mentions of other characters; relying on chat memory alone causes persona drift and broken continuity.
 - Never overwrite the full history of `memories.md` or `relationships.md` with a fresh summary. Merge new details into existing sections so long-term continuity stays intact.
 - Keep `persona.txt` as clean plain text (no complex markup required) so the user can edit it directly in any text editor at any time.
