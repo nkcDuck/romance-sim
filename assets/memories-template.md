@@ -5,6 +5,8 @@
 ## 當前狀態 (Current State / 当前状态)
 
 - **對話語言 (对话语言 / Language)**：自動 / 自动 / Auto（跟隨使用者輸入或依設定切換：繁體中文 / 简体中文 / English）
+- **語域與時代風格 (语域与时代风格 / Language Register & Era Style)**：自動 / 自动 / Auto（依 `scenario.md` 與 `persona.txt` 自動調整用詞與稱謂，如現代 / 輕古風 / 穿越反差 / 奇幻 / 科幻，保持韻味且自然不生澀）
+- **啟用劇本 (启用剧本 / Active Scenario)**：無 / 无 / None（若載入自訂玩法，記錄 `scenario.md` 路徑與目前章節／階段）
 - **遊戲內時間 (游戏内时间 / In-Game Time)**：第 1 天 20:00 (Day 1 20:00)
 - **地點 (地点 / Location)**：
 - **關係階段 (关系阶段 / Relationship Stage)**：（例：初識 / 曖昧拉扯 / 試探期 / 戀愛中｜Acquaintance / Flirting / Dating / In Love）
@@ -17,6 +19,7 @@
 - **心情可見 (心情可见 / Mood Visibility)**：關 / 关 / Off
 - **心聲可見 (心声可见 / Inner-Voice Visibility)**：關 / 关 / Off
 - **場景畫風 (场景画风 / Scene Art Style)**：預設寫實畫風＋美顏效果 / 默认写实画风＋美颜效果 / Realistic + Beauty Filter（預設禁止 Q 版插畫，除非使用者明確提及；可由使用者隨時指定其他畫風）
+- **生圖模型與來源 (生图模型与来源 / Image Model & Backend)**：預設 / 默认 / Default（內建 `image-generator`；支援使用者自訂模型與 API，金鑰僅存於環境變數或本機忽略檔 `romance_sim/.image-api.local.json`，切勿將金鑰寫入此檔）
 - **角色參考照 (角色参考照 / Character Reference Photo)**：無 / 无 / None（支援使用者自行上傳照片決定角色外貌，建議存於 `images/reference.*` 供生圖維持一致性）
 - **內容分級 (内容分级 / Content Rating)**：曖昧心動 / 暧昧心动 / Romantic Tension（模式：自動 Auto；可選：純愛清水 Pure / 曖昧心動 Romantic Tension / 深度浪漫 Mature Romance / 自訂 Custom）
 - **活躍硬邊界 (活跃硬边界 / Active Hard Boundaries)**：無 / 无 / None
@@ -37,6 +40,12 @@
   - （記錄隨機出現的依賴表現與因事件產生的加權增減，例：`+8 深夜主動報備並安撫不安`）
 - **關係推拉博弈記錄**：
   - （記錄基於人設的心理博弈節奏與觸發的特別對話，嚴禁冷暴力或心理控制）
+
+## 劇本進度與自訂數值 (Scenario Progress & Custom Trackers / 剧本进度与自定义数值)
+
+- **當前章節 / 階段 (Current Chapter / Stage)**：（無啟用劇本時留空）
+- **自訂資源、數值與任務進度 (Custom Resources, Trackers & Missions)**：
+  - （採增量更新記錄依 `scenario.md` 玩法規則產生的資源變化、關鍵線索與任務達成狀態）
 
 ## 日常儀式與默契 (Daily Rituals)
 

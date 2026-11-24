@@ -1,0 +1,9 @@
+{
+  "provider": "openai-compatible",
+  "model": "gpt-image-1",
+  "endpoint": "https://api.openai.com/v1/images/generations",
+  "api_key_env": "ROMANCE_SIM_IMAGE_API_KEY",
+  "api_key": "",
+  "size": "1024x1024",
+  "extra_headers": {}
+}

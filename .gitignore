@@ -2,3 +2,8 @@
 romance_sim/
 .DS_Store
 Thumbs.db
+
+# 忽略任何本地自訂 API 金鑰與環境變數檔
+*.local.json
+.env
+.env.*
